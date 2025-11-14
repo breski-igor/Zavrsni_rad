@@ -1,0 +1,252 @@
+﻿@{
+    ViewData["Title"] = "QR Scan";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-qrcode me-2"></i>Skeniraj QR kod
+                    </h4>
+                    <a asp-action="Index" asp-controller="Home" class="btn btn-light btn-sm">
+                        <i class="fas fa-home me-1"></i>Povratak
+                    </a>
+                </div>
+                <div class="card-body text-center">
+                    <div id="reader" style="width:300px; margin:auto;"></div>
+
+                    <div class="row mt-4 justify-content-center">
+                        <div class="col-md-10">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Evidencija dolaska na zadani datum</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Član:</label>
+                                            <input type="text" id="userSearchDate" class="form-control" placeholder="Unesi ime, prezime ili email..." />
+                                            <div id="searchResultsDate" class="list-group mt-2" style="display:none;"></div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Datum i vrijeme:</label>
+                                            <div class="row g-2">
+                                                <div class="col-2">
+                                                    <input type="number" id="day" class="form-control" placeholder="Dan" min="1" max="31" />
+                                                </div>
+                                                <div class="col-3">
+                                                    <select id="month" class="form-select">
+                                                        <option value="">Mjesec</option>
+                                                        <option value="1">Siječanj</option>
+                                                        <option value="2">Veljača</option>
+                                                        <option value="3">Ožujak</option>
+                                                        <option value="4">Travanj</option>
+                                                        <option value="5">Svibanj</option>
+                                                        <option value="6">Lipanj</option>
+                                                        <option value="7">Srpanj</option>
+                                                        <option value="8">Kolovoz</option>
+                                                        <option value="9">Rujan</option>
+                                                        <option value="10">Listopad</option>
+                                                        <option value="11">Studeni</option>
+                                                        <option value="12">Prosinac</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-3">
+                                                    <input type="number" id="year" class="form-control" placeholder="Godina" min="2020" max="2030" />
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" id="hours" class="form-control" placeholder="Sati" min="0" max="23" />
+                                                </div>
+                                                <div class="col-2">
+                                                    <input type="number" id="minutes" class="form-control" placeholder="Minute" min="0" max="59" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-2 text-center mt-3 mt-md-0">
+                                            <button class="btn btn-light btn-sm w-100" onclick="markAttendanceWithDate()">
+                                                <i class="fas fa-check-circle me-1"></i>Evidentiraj
+                                            </button>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="scanModal" tabindex="-1" aria-labelledby="scanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="scanModalLabel">Evidencija dolaska</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+            </div>
+            <div class="modal-body" id="scanModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-metal" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    let lastScanned = null;
+    let selectedUserIdDate = null;
+
+    function onScanSuccess(decodedText) {
+        if (lastScanned === decodedText) return;
+        lastScanned = decodedText;
+
+        fetch('/Attendance/MarkAttendance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ qrData: decodedText })
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("scanModalBody").innerText =
+                    (data.success ? "✔ " : "❌ ") + data.message + (data.clan ? ": " + data.clan : "");
+                var myModal = new bootstrap.Modal(document.getElementById('scanModal'));
+                myModal.show();
+                document.getElementById('scanModal').addEventListener('hidden.bs.modal', () => lastScanned = null, { once: true });
+            })
+            .catch(() => {
+                document.getElementById("scanModalBody").innerText = "❌ Došlo je do greške!";
+                var myModal = new bootstrap.Modal(document.getElementById('scanModal'));
+                myModal.show();
+                document.getElementById('scanModal').addEventListener('hidden.bs.modal', () => lastScanned = null, { once: true });
+            });
+    }
+
+    document.getElementById('userSearchDate').addEventListener('input', function () {
+        const searchTerm = this.value.trim();
+        const resultsContainer = document.getElementById('searchResultsDate');
+        if (searchTerm.length < 2) { resultsContainer.style.display = 'none'; return; }
+
+        fetch(`/Attendance/SearchUsers?term=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(users => {
+                resultsContainer.innerHTML = '';
+                if (users.length === 0) { resultsContainer.style.display = 'none'; return; }
+                users.forEach(user => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = user.label;
+                    item.onclick = () => {
+                        document.getElementById('userSearchDate').value = user.label;
+                        selectedUserIdDate = user.id;
+                        resultsContainer.style.display = 'none';
+                    };
+                    resultsContainer.appendChild(item);
+                });
+                resultsContainer.style.display = 'block';
+            });
+    });
+
+    function markAttendanceWithDate() {
+        if (!selectedUserIdDate) return alert('Molimo odaberite člana iz padajućeg izbornika');
+
+        const day = dayEl.value, month = monthEl.value, year = yearEl.value, hours = hoursEl.value, minutes = minutesEl.value;
+        const attendanceDate = new Date(year, month - 1, day, hours, minutes);
+
+        if (!day || !month || !year || !hours || !minutes || isNaN(attendanceDate.getTime()))
+            return alert('Molimo popunite ispravno sva polja za datum i vrijeme');
+
+        if (attendanceDate > new Date() && !confirm('Datum je u budućnosti. Želite li nastaviti?')) return;
+
+        fetch('/Attendance/MarkAttendanceWithDate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: selectedUserIdDate, attendanceDate: attendanceDate.toISOString() })
+        })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById("scanModalBody").innerText = data.message;
+                var myModal = new bootstrap.Modal(document.getElementById('scanModal'));
+                myModal.show();
+                selectedUserIdDate = null;
+                document.getElementById('userSearchDate').value = '';
+            })
+            .catch(err => {
+                document.getElementById("scanModalBody").innerText = '❌ Došlo je do greške: ' + err;
+                var myModal = new bootstrap.Modal(document.getElementById('scanModal'));
+                myModal.show();
+            });
+    }
+
+    const dayEl = document.getElementById('day');
+    const monthEl = document.getElementById('month');
+    const yearEl = document.getElementById('year');
+    const hoursEl = document.getElementById('hours');
+    const minutesEl = document.getElementById('minutes');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const now = new Date();
+        dayEl.value = now.getDate();
+        monthEl.value = now.getMonth() + 1;
+        yearEl.value = now.getFullYear();
+        hoursEl.value = now.getHours();
+        minutesEl.value = now.getMinutes();
+    });
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('#userSearchDate') && !e.target.closest('#searchResultsDate'))
+            document.getElementById('searchResultsDate').style.display = 'none';
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener('input', function () {
+            const val = parseInt(this.value), min = parseInt(this.min), max = parseInt(this.max);
+            if (val < min) this.value = min;
+            if (val > max) this.value = max;
+        });
+    });
+
+    let scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
+    scanner.render(onScanSuccess);
+</script>
+
+<style>
+    #searchResultsDate {
+        position: absolute;
+        z-index: 1000;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .list-group-item {
+        cursor: pointer;
+    }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    
+
+    .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .card-header {
+        font-weight: 600;
+    }
+</style>

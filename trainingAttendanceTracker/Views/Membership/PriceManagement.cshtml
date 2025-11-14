@@ -1,0 +1,187 @@
+﻿@model IEnumerable<trainingAttendanceTracker.Models.MembershipPrice>
+
+@{
+    ViewData["Title"] = "Membership Price Management";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Set New Price</h5>
+    </div>
+    <div class="card-body">
+        <form id="priceForm">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Price (€)</label>
+                    <input type="number" class="form-control" id="price" name="price" step="0.01" min="1" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Effective From</label>
+                    <input type="date" class="form-control" id="effectiveFrom" name="effectiveFrom" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Description</label>
+                    <input type="text" class="form-control" id="description" name="description" placeholder="e.g., New price from 2026">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-light">
+                        <i class="fas fa-euro-sign me-1"></i>Set New Price
+                    </button>
+                    <a asp-action="Management" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Management
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Price (€)</th>
+                    <th>Effective From</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var price in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">€@price.Price.ToString("F2")</td>
+                        <td>@price.EffectiveFrom.ToString("dd.MM.yyyy")</td>
+                        <td>@price.Description</td>
+                        <td>
+                            @if (price.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td>@price.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        No price history found. Using default price of €40.00.
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById('effectiveFrom').valueAsDate = new Date();
+
+        document.getElementById('priceForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = {
+                price: parseFloat(document.getElementById('price').value),
+                effectiveFrom: document.getElementById('effectiveFrom').value,
+                description: document.getElementById('description').value
+            };
+
+            if (!formData.price || !formData.effectiveFrom) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            fetch('/Membership/CreatePrice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Price set successfully');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error setting price');
+                });
+        });
+    </script>
+
+    <style>
+        .table {
+            color: white !important;
+            background-color: #222 !important;
+        }
+
+            .table td,
+            .table th {
+                color: white !important;
+                border-color: #444 !important;
+            }
+
+            .table thead th {
+                background-color: #333 !important;
+                border-color: #444 !important;
+            }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #222 !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #2a2a2a !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: #333 !important;
+        }
+
+        .btn-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            color: #333;
+            font-weight: normal;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+            .btn-light:hover {
+                background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                color: #222;
+                border-color: #ced4da;
+            }
+
+            .btn-light:active {
+                transform: translateY(0);
+            }
+
+        .alert {
+            color: white !important;
+        }
+
+        .alert-info {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+    </style>
+}

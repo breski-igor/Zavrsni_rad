@@ -1,0 +1,180 @@
+﻿@model List<string>
+@{
+    ViewData["Title"] = "Galerija";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header custom-card-header">
+                    <div class="d-flex justify-content-end align-items-center">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Upload" class="btn btn-light btn-sm">
+                                <i class="fas fa-upload me-1"></i>Dodaj Slike
+                            </a>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success">
+                            @TempData["Success"]
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger">
+                            @TempData["Error"]
+                        </div>
+                    }
+
+                    @if (Model.Any())
+                    {
+                        <div class="row">
+                            @foreach (var imageName in Model)
+                            {
+                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <img src="@Url.Content("~/images/gallery/" + imageName)"
+                                             class="card-img-top gallery-image"
+                                             alt="Gallery image"
+                                             style="height: 200px; object-fit: cover; cursor: pointer;"
+                                             data-bs-toggle="modal"
+                                             data-bs-target="#imageModal"
+                                             data-image-src="@Url.Content("~/images/gallery/" + imageName)">
+                                        @if (User.IsInRole("Admin"))
+                                        {
+                                            <div class="card-body text-center p-2">
+                                                <form method="post" asp-action="Delete" class="d-inline">
+                                                    <input type="hidden" name="imageName" value="@imageName" />
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                            onclick="return confirm('Jeste li sigurni da želite obrisati ovu sliku?')">
+                                                        <i class="fas fa-trash"></i> Obriši
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-images fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Galerija je prazna</h5>
+                            <p class="text-muted">Trenutno nema slika u galeriji.</p>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Upload" class="btn btn-light">
+                                    <i class="fas fa-upload me-1"></i>Dodaj Prve Slike
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 bg-transparent">
+            <div class="modal-header border-0 pb-0">
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="modalImage" src="" alt="Povećana slika" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-card-header {
+        background: transparent;
+    }
+
+    .gallery-image {
+        transition: transform 0.3s ease;
+        border: none;
+    }
+
+        .gallery-image:hover {
+            transform: scale(1.05);
+        }
+
+    .card {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .card-img-top {
+        border-radius: 0;
+    }
+
+    .modal-content.bg-transparent {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .btn-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        color: #333;
+        font-weight: normal;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-light:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: #222;
+            border-color: #ced4da;
+        }
+
+        .btn-light:active {
+            transform: translateY(0);
+        }
+
+    .alert {
+        color: white !important;
+    }
+
+    .alert-success {
+        background-color: #198754;
+        border-color: #198754;
+    }
+
+    .alert-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var imageModal = document.getElementById('imageModal');
+            imageModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var imageSrc = button.getAttribute('data-image-src');
+                var modalImage = document.getElementById('modalImage');
+                modalImage.src = imageSrc;
+                console.log('Učitavam sliku:', imageSrc);
+            });
+        });
+    </script>
+}

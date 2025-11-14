@@ -1,0 +1,136 @@
+﻿@model trainingAttendanceTracker.Models.BalanceViewModel
+
+@{
+    ViewData["Title"] = "Membership Balance Overview";
+}
+
+<h2>Membership Balance Overview - @Model.Year</h2>
+
+<div class="mb-3">
+    <a asp-action="Management" asp-route-year="@Model.Year" class="btn btn-light btn-sm">
+        <i class="fas fa-arrow-left me-1"></i>Back to Management
+    </a>
+    <div class="float-end">
+        <label class="text-white">Year: </label>
+        <select id="yearSelect" class="form-select d-inline-block w-auto">
+            @for (int y = DateTime.Now.Year - 1; y <= DateTime.Now.Year + 1; y++)
+            {
+                <option value="@y" selected="@(y == Model.Year)">@y</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Balance</h5>
+                <h3 class="card-text">€@Model.TotalBalance.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h5 class="card-title">Total Paid Memberships</h5>
+                <h3 class="card-text">@Model.MonthlyBalances.Sum(m => m.PaidCount)</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Paid Memberships</th>
+                <th>Amount (€40 each)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var month in Model.MonthlyBalances)
+            {
+                <tr>
+                    <td>@month.MonthName</td>
+                    <td>@month.PaidCount</td>
+                    <td>€@month.Amount.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Total</th>
+                <th>@Model.MonthlyBalances.Sum(m => m.PaidCount)</th>
+                <th>€@Model.TotalBalance.ToString("F2")</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('yearSelect').addEventListener('change', function () {
+            window.location.href = '/Membership/Balance?year=' + this.value;
+        });
+    </script>
+
+    <style>
+        .table {
+            color: white !important;
+            background-color: #222 !important;
+        }
+
+            .table td,
+            .table th {
+                color: white !important;
+                border-color: #444 !important;
+            }
+
+            .table thead th {
+                background-color: #333 !important;
+                border-color: #444 !important;
+            }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #222 !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #2a2a2a !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: #333 !important;
+        }
+
+        .table tfoot th {
+            background-color: #444 !important;
+            border-color: #555 !important;
+        }
+
+        .btn-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            color: #333;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+            .btn-light:hover {
+                background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                color: #222;
+                border-color: #ced4da;
+            }
+
+            .btn-light:active {
+                transform: translateY(0);
+            }
+    </style>
+}

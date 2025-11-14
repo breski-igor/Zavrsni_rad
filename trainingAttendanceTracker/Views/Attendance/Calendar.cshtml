@@ -1,0 +1,168 @@
+﻿@model trainingAttendanceTracker.Models.CalendarViewModel
+
+@{
+    ViewData["Title"] = "Kalendar dolazaka";
+    var firstDay = Model.FirstDayOfMonth;
+    var startDay = (int)firstDay.DayOfWeek;
+    var daysInMonth = Model.DaysInMonth;
+    var prevMonth = Model.Month == 1 ? 12 : Model.Month - 1;
+    var prevYear = Model.Month == 1 ? Model.Year - 1 : Model.Year;
+    var nextMonth = Model.Month == 12 ? 1 : Model.Month + 1;
+    var nextYear = Model.Month == 12 ? Model.Year + 1 : Model.Year;
+}
+
+<h2>@Model.MonthName @Model.Year</h2>
+
+<div class="calendar-nav mb-3">
+    <a asp-action="Calendar" asp-route-year="@prevYear" asp-route-month="@prevMonth" class="btn btn-secondary">
+        &larr; Prethodni mjesec
+    </a>
+    <a asp-action="Calendar" asp-route-year="@DateTime.Now.Year" asp-route-month="@DateTime.Now.Month" class="btn btn-primary mx-2">
+        Trenutni mjesec
+    </a>
+    <a asp-action="Calendar" asp-route-year="@nextYear" asp-route-month="@nextMonth" class="btn btn-secondary">
+        Sljedeći mjesec &rarr;
+    </a>
+</div>
+
+<div class="calendar">
+    <div class="calendar-header">
+        <div class="day-header">Pon</div>
+        <div class="day-header">Uto</div>
+        <div class="day-header">Sri</div>
+        <div class="day-header">Čet</div>
+        <div class="day-header">Pet</div>
+        <div class="day-header">Sub</div>
+        <div class="day-header">Ned</div>
+    </div>
+
+    <div class="calendar-body">
+        @for (int i = 0; i < startDay - 1; i++)
+        {
+                <div class="day empty"></div>
+        }
+
+        @for (int day = 1; day <= daysInMonth; day++)
+        {
+            var currentDate = new DateTime(Model.Year, Model.Month, day);
+            var hasAttendance = Model.AttendanceCounts.ContainsKey(currentDate);
+            var attendanceCount = hasAttendance ? Model.AttendanceCounts[currentDate] : 0;
+            var isToday = currentDate.Date == DateTime.Today;
+
+                <div class="day @(isToday ? "today" : "")">
+                    <div class="day-number">@day</div>
+                @if (hasAttendance)
+                {
+                            <div class="attendance-badge">
+                                <a asp-action="DayDetails" 
+                                   asp-route-year="@Model.Year" 
+                                   asp-route-month="@Model.Month" 
+                                   asp-route-day="@day"
+                                   class="attendance-link">
+                            @attendanceCount
+                                </a>
+                            </div>
+                }
+                else
+                {
+                            <div class="no-attendance">0</div>
+                }
+                </div>
+        }
+    </div>
+</div>
+
+<style>
+    .calendar {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .calendar-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        background-color: #343a40;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px 0;
+    }
+
+    .calendar-body {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1px;
+        background-color: #ddd;
+    }
+
+    .day {
+        background-color: #f8f9fa;
+        color: #333;
+        min-height: 80px;
+        padding: 5px;
+        position: relative;
+        border: 1px solid #dee2e6;
+    }
+
+        .day.empty {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        .day.today {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+    .day-number {
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .attendance-badge {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+    }
+
+    .attendance-link {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        background-color: #28a745;
+        color: white;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .attendance-link:hover {
+            background-color: #218838;
+            color: white;
+            text-decoration: none;
+        }
+
+    .no-attendance {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 30px;
+        height: 30px;
+        color: #6c757d;
+        text-align: center;
+        line-height: 30px;
+    }
+
+    .calendar-nav {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>

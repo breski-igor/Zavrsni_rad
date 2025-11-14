@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Upload Slika u Galeriju";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Dodaj Slike u Galeriju
+                    </h4>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Success != null)
+                    {
+                        <div class="alert alert-success">
+                            @ViewBag.Success
+                        </div>
+                    }
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="galleryImages" class="form-label">Odaberite slike za galeriju:</label>
+                            <input type="file" class="form-control" id="galleryImages" name="galleryImages"
+                                   accept=".jpg,.jpeg,.png,.gif" multiple required>
+                            <div class="form-text">
+                                Dozvoljeni formati: JPG, PNG, GIF (max 5MB po slici). Možete odabrati više slika odjednom.
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i>Upload Slike
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Nazad na Galeriju
+                            </a>
+                        </div>
+                    </form>
+
+                    <div id="imagePreview" class="mt-4" style="display: none;">
+                        <h6>Preview odabranih slika:</h6>
+                        <div class="row" id="previewContainer"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('galleryImages').addEventListener('change', function(e) {
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+
+            if (this.files.length > 0) {
+                imagePreview.style.display = 'block';
+
+                Array.from(this.files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const col = document.createElement('div');
+                            col.className = 'col-3 mb-2';
+                            col.innerHTML = `
+                                <img src="${e.target.result}" class="img-thumbnail" style="height: 100px; object-fit: cover;">
+                                <div class="small text-truncate">${file.name}</div>
+                            `;
+                            previewContainer.appendChild(col);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+    </script>
+}

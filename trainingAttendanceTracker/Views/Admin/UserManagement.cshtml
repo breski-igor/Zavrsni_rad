@@ -1,0 +1,168 @@
+﻿@model List<trainingAttendanceTracker.Controllers.UserRoleViewModel>
+
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<h2>User Management</h2>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Current Role</th>
+                <th>New Role</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>
+                        <span class="badge
+                            @(user.CurrentRole == "Admin" ? "bg-danger" :
+                              user.CurrentRole == "Trainer" ? "bg-warning" : "bg-secondary")">
+                            @user.CurrentRole
+                        </span>
+                    </td>
+                    <td>
+                        <select class="form-select role-select" data-user-id="@user.UserId">
+                            @foreach (var role in user.Roles)
+                            {
+                                <option value="@role" selected="@(role == user.CurrentRole)">@role</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-light btn-sm update-role" data-user-id="@user.UserId">
+                            <i class="fas fa-sync-alt me-1"></i>Update Role
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        function updateUserRole(userId, newRole) {
+            console.log('Sending update request:', { userId, newRole });
+
+            fetch('/Admin/UpdateUserRole', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    newRole: newRole
+                })
+            })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        alert('Role updated successfully');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating role');
+                });
+        }
+
+        document.querySelectorAll('.update-role').forEach(button => {
+            button.addEventListener('click', function () {
+                const userId = this.dataset.userId;
+                const roleSelect = document.querySelector(`.role-select[data-user-id="${userId}"]`);
+                const newRole = roleSelect.value;
+
+                console.log('Button clicked - UserId:', userId, 'NewRole:', newRole);
+
+                if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
+                    return;
+                }
+
+                updateUserRole(userId, newRole);
+            });
+        });
+    </script>
+
+    <style>
+        .table {
+            color: white !important;
+            background-color: #222 !important;
+        }
+
+            .table td,
+            .table th {
+                color: white !important;
+                border-color: #444 !important;
+            }
+
+            .table thead th {
+                background-color: #333 !important;
+                border-color: #444 !important;
+            }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #222 !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #2a2a2a !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: #333 !important;
+        }
+
+        .btn-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6;
+            color: #333;
+            font-weight: normal;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+            .btn-light:hover {
+                background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+                color: #222;
+                border-color: #ced4da;
+            }
+
+            .btn-light:active {
+                transform: translateY(0);
+            }
+
+        .form-select {
+            background-color: #333;
+            color: white;
+            border-color: #444;
+        }
+
+            .form-select:focus {
+                background-color: #333;
+                color: white;
+                border-color: #86b7fe;
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+            }
+    </style>
+}

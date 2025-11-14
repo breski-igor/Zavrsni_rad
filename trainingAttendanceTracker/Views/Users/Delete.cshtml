@@ -1,0 +1,65 @@
+﻿@model trainingAttendanceTracker.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Obriši člana";
+}
+
+<h2>Obriši člana</h2>
+
+<h3>Jeste li sigurni da želite obrisati ovog člana?</h3>
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Ime)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Ime)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Prezime)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Prezime)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Email)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Email)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.DatumRodjenja)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.DatumRodjenja)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Rang)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Rang)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.DatumUclanjenja)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.DatumUclanjenja)
+        </dd>
+    </dl>
+
+    <div class="alert alert-warning">
+        <strong>Upozorenje:</strong> Brisanjem člana će se također obrisati svi njegovi podaci o dolascima i članarinama.
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Obriši" class="btn btn-danger" />
+        <a asp-action="Index" class="btn btn-secondary">Natrag na popis</a>
+    </form>
+</div>

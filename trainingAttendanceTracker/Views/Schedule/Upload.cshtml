@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Upload Rasporeda";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Upload Rasporeda Treninga
+                    </h4>
+                </div>
+                <div class="card-body">
+
+                    @if (ViewBag.Success != null)
+                    {
+                        <div class="alert alert-success">
+                            @ViewBag.Success
+                        </div>
+                    }
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="scheduleImage" class="form-label">Odaberite sliku rasporeda:</label>
+                            <input type="file" class="form-control" id="scheduleImage" name="scheduleImage" accept=".jpg,.jpeg,.png,.gif" required>
+                            <div class="form-text">
+                                Dozvoljeni formati: JPG, PNG, GIF (max 5MB)
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i>Upload Raspored
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Nazad na Raspored
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

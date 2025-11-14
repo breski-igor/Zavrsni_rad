@@ -1,0 +1,187 @@
+﻿@model IEnumerable<trainingAttendanceTracker.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Članovi";
+}
+
+<h2>Popis članova</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="mb-3">
+    <a asp-controller="Attendance" asp-action="Scan" class="btn btn-primary">QR Skeniranje</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Ime</th>
+                <th>Prezime</th>
+                <th>Datum rođenja</th>
+                <th>Pojas</th>
+                <th>Datum učlanjenja</th>
+                <th>QR kod</th>
+                <th>Email</th>
+                <th>Akcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>@user.Ime</td>
+                    <td>@user.Prezime</td>
+                    <td>@user.DatumRodjenja.ToShortDateString()</td>
+                    <td>
+                        <span class="badge bg-secondary">@user.Rang</span>
+                    </td>
+                    <td>@user.DatumUclanjenja.ToShortDateString()</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(user.QrCodePath))
+                        {
+                            <img src="@user.QrCodePath"
+                                 alt="QR kod"
+                                 width="80"
+                                 style="cursor: pointer;"
+                                 class="qr-code-thumbnail"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#qrCodeModal"
+                                 data-qr-src="@user.QrCodePath"
+                                 data-user-name="@user.Ime @user.Prezime" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">Nema QR koda</span>
+                        }
+                    </td>
+                    <td>@user.Email</td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-warning btn-sm">Uredi</a>
+                            <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-danger btn-sm">Obriši</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Nema registriranih članova.
+    </div>
+}
+
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">QR kod - <span id="modalUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalQrCode" src="" alt="QR kod" class="img-fluid" style="max-height: 400px;" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zatvori</button>
+                <button type="button" class="btn btn-primary" onclick="downloadQrCode()">Preuzmi QR kod</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const qrCodeModal = document.getElementById('qrCodeModal');
+            
+            qrCodeModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const qrCodeSrc = button.getAttribute('data-qr-src');
+                const userName = button.getAttribute('data-user-name');
+                
+                const modalImage = document.getElementById('modalQrCode');
+                modalImage.src = qrCodeSrc;
+                
+                document.getElementById('modalUserName').textContent = userName;
+                
+                modalImage.setAttribute('data-download-src', qrCodeSrc);
+                modalImage.setAttribute('data-user-name', userName);
+            });
+        });
+
+        function downloadQrCode() {
+            const modalImage = document.getElementById('modalQrCode');
+            const qrCodeSrc = modalImage.getAttribute('data-download-src');
+            const userName = modalImage.getAttribute('data-user-name');
+            
+            const link = document.createElement('a');
+            link.href = qrCodeSrc;
+            link.download = `QR_kod_${userName.replace(/\s+/g, '_')}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.querySelectorAll('.qr-code-thumbnail').forEach(img => {
+            img.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+                this.style.transition = 'transform 0.2s';
+            });
+            
+            img.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+
+    <style>
+        .table {
+            color: white !important;
+            background-color: #222 !important;
+        }
+    
+        .table td,
+        .table th {
+            color: white !important;
+            border-color: #444 !important;
+        }
+    
+        .table thead th {
+            background-color: #333 !important;
+            border-color: #444 !important;
+        }
+    
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #222 !important;
+        }
+    
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #2a2a2a !important;
+        }
+    
+        .table tbody tr:hover {
+            background-color: #333 !important;
+        }
+    
+        .qr-code-thumbnail:hover {
+            opacity: 0.8;
+        }
+    
+        .modal-body img {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            background: white;
+        }
+
+    </style>
+}

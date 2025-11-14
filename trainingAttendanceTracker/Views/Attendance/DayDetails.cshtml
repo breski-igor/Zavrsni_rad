@@ -1,0 +1,113 @@
+﻿@model IEnumerable<trainingAttendanceTracker.Models.EvidencijaDolazaka>
+
+@{
+    ViewData["Title"] = "Dolasci za dan: " + ViewBag.SelectedDate;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<a asp-action="Calendar"
+   asp-route-year="@Context.Request.RouteValues["year"]"
+   asp-route-month="@Context.Request.RouteValues["month"]"
+   class="btn btn-light mb-3">
+    <i class="fas fa-arrow-left me-1"></i>Natrag na kalendar
+</a>
+
+@if (Model.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Ime i Prezime</th>
+                    <th>Vrijeme dolaska</th>
+                    <th>Email</th>
+                    <th>Rang</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.User.Ime @item.User.Prezime</td>
+                        <td>@item.DatumDolaska.ToString("HH:mm")</td>
+                        <td>@item.User.Email</td>
+                        <td>@item.User.Rang</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-info">
+        Ukupno dolazaka: @Model.Count()
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Nema evidentiranih dolazaka za ovaj dan.
+    </div>
+}
+
+<style>
+    .table {
+        color: white !important;
+        background-color: #222 !important;
+    }
+
+        .table td,
+        .table th {
+            color: white !important;
+            border-color: #444 !important;
+        }
+
+        .table thead th {
+            background-color: #333 !important;
+            border-color: #444 !important;
+        }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #222 !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #2a2a2a !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: #333 !important;
+    }
+
+    .btn-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        color: #333;
+        font-weight: normal;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-light:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: #222;
+            border-color: #ced4da;
+        }
+
+        .btn-light:active {
+            transform: translateY(0);
+        }
+
+    .alert {
+        color: white !important;
+    }
+
+    .alert-info {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+    }
+</style>

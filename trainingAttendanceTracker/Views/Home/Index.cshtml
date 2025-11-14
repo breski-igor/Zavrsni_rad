@@ -1,0 +1,134 @@
+﻿@model trainingAttendanceTracker.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">@(Model?.Ime ?? "") @(Model?.Prezime ?? "")</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                @if (User.Identity.IsAuthenticated && Model != null && !string.IsNullOrEmpty(Model.QrCodePath))
+                {
+                    <img src="@Model.QrCodePath"
+                         alt="QR kod"
+                         class="img-fluid"
+                         style="max-height: 400px;" />
+                }
+                else if (User.Identity.IsAuthenticated)
+                {
+                    <div class="alert alert-warning">
+                        <p>QR kod nije dostupan.</p>
+                        <p>Kontaktirajte administratora.</p>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Zatvori</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="qr-button-container">
+        <button class="btn btn-light btn-lg shadow qr-button"
+                data-bs-toggle="modal"
+                data-bs-target="#qrCodeModal"
+                title="Prikaži moj QR kod">
+            <i class="fas fa-qrcode me-2"></i>Moj QR
+        </button>
+    </div>
+}
+
+<div class="home-content">
+    <div class="text-center mt-5">
+        <img src="~/images/pics/logo.jpg" class="img-fluid rounded shadow main-logo" />
+    </div>
+</div>
+
+<style>
+    .home-content {
+        margin-bottom: 150px; 
+    }
+
+    .text-center {
+        position: relative;
+    }
+
+    .main-logo {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+        -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
+        max-width: 80%;
+    }
+
+    .qr-button-container {
+        position: fixed;
+        bottom: 150px; 
+        right: 20px;
+        z-index: 1050;
+    }
+
+    .qr-button {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        color: #333;
+        font-weight: normal;
+        padding: 12px 24px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+        .qr-button:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            color: #222;
+            border-color: #ced4da;
+        }
+
+        .qr-button:active {
+            transform: translateY(0);
+        }
+
+    .btn-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        color: #333;
+        font-weight: normal;
+        padding: 8px 16px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+        .btn-light:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            color: #222;
+            border-color: #ced4da;
+        }
+
+        .btn-light:active {
+            transform: translateY(0);
+        }
+
+    .alert {
+        color: white !important;
+    }
+
+    .alert-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+</style>

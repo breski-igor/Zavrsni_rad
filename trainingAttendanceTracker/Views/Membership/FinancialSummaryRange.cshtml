@@ -1,0 +1,318 @@
+﻿@model trainingAttendanceTracker.Models.FinancialSummaryRangeViewModel
+
+@{
+    ViewData["Title"] = "Financial Summary";
+    var totalIncome = Model.TotalMembershipIncome + Model.TotalOtherIncome;
+}
+
+<h2>Financial Summary</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Select Date Range</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="FinancialSummaryRange" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Start Date</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <input type="number" name="startDay" class="form-control" placeholder="Dan"
+                               min="1" max="31" value="@Model.StartDate.Day" required />
+                    </div>
+                    <div class="col-5">
+                        <select name="startMonth" class="form-select" required>
+                            <option value="1" selected="@(Model.StartDate.Month == 1)">Siječanj</option>
+                            <option value="2" selected="@(Model.StartDate.Month == 2)">Veljača</option>
+                            <option value="3" selected="@(Model.StartDate.Month == 3)">Ožujak</option>
+                            <option value="4" selected="@(Model.StartDate.Month == 4)">Travanj</option>
+                            <option value="5" selected="@(Model.StartDate.Month == 5)">Svibanj</option>
+                            <option value="6" selected="@(Model.StartDate.Month == 6)">Lipanj</option>
+                            <option value="7" selected="@(Model.StartDate.Month == 7)">Srpanj</option>
+                            <option value="8" selected="@(Model.StartDate.Month == 8)">Kolovoz</option>
+                            <option value="9" selected="@(Model.StartDate.Month == 9)">Rujan</option>
+                            <option value="10" selected="@(Model.StartDate.Month == 10)">Listopad</option>
+                            <option value="11" selected="@(Model.StartDate.Month == 11)">Studeni</option>
+                            <option value="12" selected="@(Model.StartDate.Month == 12)">Prosinac</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <input type="number" name="startYear" class="form-control" placeholder="Godina"
+                               min="2020" max="2030" value="@Model.StartDate.Year" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <label class="form-label">End Date</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <input type="number" name="endDay" class="form-control" placeholder="Dan"
+                               min="1" max="31" value="@Model.EndDate.Day" required />
+                    </div>
+                    <div class="col-5">
+                        <select name="endMonth" class="form-select" required>
+                            <option value="1" selected="@(Model.EndDate.Month == 1)">Siječanj</option>
+                            <option value="2" selected="@(Model.EndDate.Month == 2)">Veljača</option>
+                            <option value="3" selected="@(Model.EndDate.Month == 3)">Ožujak</option>
+                            <option value="4" selected="@(Model.EndDate.Month == 4)">Travanj</option>
+                            <option value="5" selected="@(Model.EndDate.Month == 5)">Svibanj</option>
+                            <option value="6" selected="@(Model.EndDate.Month == 6)">Lipanj</option>
+                            <option value="7" selected="@(Model.EndDate.Month == 7)">Srpanj</option>
+                            <option value="8" selected="@(Model.EndDate.Month == 8)">Kolovoz</option>
+                            <option value="9" selected="@(Model.EndDate.Month == 9)">Rujan</option>
+                            <option value="10" selected="@(Model.EndDate.Month == 10)">Listopad</option>
+                            <option value="11" selected="@(Model.EndDate.Month == 11)">Studeni</option>
+                            <option value="12" selected="@(Model.EndDate.Month == 12)">Prosinac</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <input type="number" name="endYear" class="form-control" placeholder="Godina"
+                               min="2020" max="2030" value="@Model.EndDate.Year" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-light w-100">
+                    <i class="fas fa-chart-bar me-1"></i>Generate Report
+                </button>
+            </div>
+        </form>
+        <div class="mt-2">
+            <a asp-action="Payments" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Back to Payments
+            </a>
+            <span class="text-muted ms-3">
+                Period: @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Membership Income</h5>
+                <h3 class="card-text">€@Model.TotalMembershipIncome.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Other Income</h5>
+                <h3 class="card-text">€@Model.TotalOtherIncome.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Total Income</h5>
+                <h3 class="card-text">€@totalIncome.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Total Expenses</h5>
+                <h3 class="card-text">€@Model.TotalExpenses.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card @(Model.NetBalance >= 0 ? "bg-dark" : "bg-warning") text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Net Balance</h5>
+                <h3 class="card-text">€@Model.NetBalance.ToString("F2")</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white h-100">
+            <div class="card-body text-center d-flex flex-column justify-content-center">
+                <h5 class="card-title">Transactions</h5>
+                <h3 class="card-text">@Model.Payments.Count</h3>
+                <small>Payment Records</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.MonthlySummaries.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Monthly Breakdown</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Membership Income</th>
+                            <th>Other Income</th>
+                            <th>Expenses</th>
+                            <th>Net</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var month in Model.MonthlySummaries)
+                        {
+                            <tr>
+                                <td>@month.MonthName</td>
+                                <td class="text-success">€@month.MembershipIncome.ToString("F2")</td>
+                                <td class="text-info">€@month.OtherIncome.ToString("F2")</td>
+                                <td class="text-danger">€@month.Expenses.ToString("F2")</td>
+                                <td class="@(month.Net >= 0 ? "text-success" : "text-danger") fw-bold">
+                                    €@month.Net.ToString("F2")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th class="text-success">€@Model.TotalMembershipIncome.ToString("F2")</th>
+                            <th class="text-info">€@Model.TotalOtherIncome.ToString("F2")</th>
+                            <th class="text-danger">€@Model.TotalExpenses.ToString("F2")</th>
+                            <th class="@(Model.NetBalance >= 0 ? "text-success" : "text-danger")">
+                                €@Model.NetBalance.ToString("F2")
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        No financial data found for the selected date range.
+        @if (Model.StartDate != default && Model.EndDate != default)
+        {
+            <div>Date range: @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")</div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const startDay = parseInt(document.querySelector('input[name="startDay"]').value);
+            const startMonth = parseInt(document.querySelector('select[name="startMonth"]').value);
+            const startYear = parseInt(document.querySelector('input[name="startYear"]').value);
+
+            const endDay = parseInt(document.querySelector('input[name="endDay"]').value);
+            const endMonth = parseInt(document.querySelector('select[name="endMonth"]').value);
+            const endYear = parseInt(document.querySelector('input[name="endYear"]').value);
+
+            const startDate = new Date(startYear, startMonth - 1, startDay);
+            const endDate = new Date(endYear, endMonth - 1, endDay);
+
+            if (startDate > endDate) {
+                e.preventDefault();
+                alert('Start date cannot be after end date');
+                return;
+            }
+        });
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function () {
+                const value = parseInt(this.value);
+                const min = parseInt(this.min);
+                const max = parseInt(this.max);
+
+                if (value < min) this.value = min;
+                if (value > max) this.value = max;
+            });
+        });
+    </script>
+
+    <style>
+        .table {
+            color: white !important;
+            background-color: #222 !important;
+        }
+
+            .table td,
+            .table th {
+                color: white !important;
+                border-color: #444 !important;
+            }
+
+            .table thead th {
+                background-color: #333 !important;
+                border-color: #444 !important;
+            }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #222 !important;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #2a2a2a !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: #333 !important;
+        }
+
+        .table tfoot th {
+            background-color: #444 !important;
+            border-color: #555 !important;
+        }
+
+        .btn-light {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #333;
+            font-weight: normal;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: none;
+            box-shadow: none;
+            height: auto;
+        }
+
+            .btn-light:hover {
+                background: #e9ecef;
+                color: #333;
+                border-color: #ced4da;
+                transform: none;
+                box-shadow: none;
+            }
+
+        .card {
+            min-height: 140px;
+        }
+
+        .card-body {
+            padding: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-text {
+            font-size: 1.5rem;
+            margin-bottom: 0;
+        }
+
+        .alert {
+            color: white !important;
+        }
+
+        .alert-info {
+            background-color: #0dcaf0;
+            border-color: #0dcaf0;
+        }
+    </style>
+}

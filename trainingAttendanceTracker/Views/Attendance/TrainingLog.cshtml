@@ -1,0 +1,361 @@
+﻿@model trainingAttendanceTracker.Models.TrainingLogViewModel
+
+@{
+    ViewData["Title"] = "My Training Log";
+}
+
+<h2>My Training Log</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Select Date Range</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="TrainingLog" class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Start Date</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <input type="number" name="startDay" class="form-control" placeholder="Dan"
+                               min="1" max="31" value="@Model.StartDate.Day" required />
+                    </div>
+                    <div class="col-5">
+                        <select name="startMonth" class="form-select" required>
+                            <option value="1" selected="@(Model.StartDate.Month == 1)">Siječanj</option>
+                            <option value="2" selected="@(Model.StartDate.Month == 2)">Veljača</option>
+                            <option value="3" selected="@(Model.StartDate.Month == 3)">Ožujak</option>
+                            <option value="4" selected="@(Model.StartDate.Month == 4)">Travanj</option>
+                            <option value="5" selected="@(Model.StartDate.Month == 5)">Svibanj</option>
+                            <option value="6" selected="@(Model.StartDate.Month == 6)">Lipanj</option>
+                            <option value="7" selected="@(Model.StartDate.Month == 7)">Srpanj</option>
+                            <option value="8" selected="@(Model.StartDate.Month == 8)">Kolovoz</option>
+                            <option value="9" selected="@(Model.StartDate.Month == 9)">Rujan</option>
+                            <option value="10" selected="@(Model.StartDate.Month == 10)">Listopad</option>
+                            <option value="11" selected="@(Model.StartDate.Month == 11)">Studeni</option>
+                            <option value="12" selected="@(Model.StartDate.Month == 12)">Prosinac</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <input type="number" name="startYear" class="form-control" placeholder="Godina"
+                               min="2020" max="2030" value="@Model.StartDate.Year" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <label class="form-label">End Date</label>
+                <div class="row g-2">
+                    <div class="col-3">
+                        <input type="number" name="endDay" class="form-control" placeholder="Dan"
+                               min="1" max="31" value="@Model.EndDate.Day" required />
+                    </div>
+                    <div class="col-5">
+                        <select name="endMonth" class="form-select" required>
+                            <option value="1" selected="@(Model.EndDate.Month == 1)">Siječanj</option>
+                            <option value="2" selected="@(Model.EndDate.Month == 2)">Veljača</option>
+                            <option value="3" selected="@(Model.EndDate.Month == 3)">Ožujak</option>
+                            <option value="4" selected="@(Model.EndDate.Month == 4)">Travanj</option>
+                            <option value="5" selected="@(Model.EndDate.Month == 5)">Svibanj</option>
+                            <option value="6" selected="@(Model.EndDate.Month == 6)">Lipanj</option>
+                            <option value="7" selected="@(Model.EndDate.Month == 7)">Srpanj</option>
+                            <option value="8" selected="@(Model.EndDate.Month == 8)">Kolovoz</option>
+                            <option value="9" selected="@(Model.EndDate.Month == 9)">Rujan</option>
+                            <option value="10" selected="@(Model.EndDate.Month == 10)">Listopad</option>
+                            <option value="11" selected="@(Model.EndDate.Month == 11)">Studeni</option>
+                            <option value="12" selected="@(Model.EndDate.Month == 12)">Prosinac</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <input type="number" name="endYear" class="form-control" placeholder="Godina"
+                               min="2020" max="2030" value="@Model.EndDate.Year" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+            </div>
+        </form>
+        <div class="mt-2">
+            <span class="text-muted">
+                Showing: @Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Total Trainings</h5>
+                <h1 class="card-text display-4">@Model.TotalTrainings</h1>
+                <p class="card-text">in selected period</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Average per Month</h5>
+                <h1 class="card-text display-4">
+                    @if (Model.MonthlySummary.Any())
+                    {
+                        @((int)Math.Round(Model.MonthlySummary.Average(m => m.TrainingCount)))
+                    }
+                    else
+                    {
+                        <text>0</text>
+                    }
+                </h1>
+                <p class="card-text">trainings per month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">Training Frequency</h5>
+                <h1 class="card-text display-4">
+                    @if (Model.TotalTrainings > 0)
+                    {
+                        var daysInPeriod = (Model.EndDate - Model.StartDate).TotalDays + 1;
+                        var frequency = daysInPeriod / Model.TotalTrainings;
+                        @frequency.ToString("F1")
+                    }
+                    else
+                    {
+                        <text>0</text>
+                    }
+                </h1>
+                <p class="card-text">days between trainings</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.MonthlySummary.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Monthly Summary</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Training Sessions</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var month in Model.MonthlySummary)
+                        {
+                            <tr>
+                                <td>@month.MonthYear</td>
+                                <td>@month.TrainingCount</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        @{
+                                            var maxSessions = Model.MonthlySummary.Max(m => m.TrainingCount);
+                                            var percentage = maxSessions > 0 ? (month.TrainingCount * 100) / maxSessions : 0;
+                                        }
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             style="width: @percentage%"
+                                             aria-valuenow="@month.TrainingCount"
+                                             aria-valuemin="0"
+                                             aria-valuemax="@maxSessions">
+                                            @month.TrainingCount
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+@if (Model.AttendanceRecords.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Training Sessions Details</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Time</th>
+                            <th>Week</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var record in Model.AttendanceRecords)
+                        {
+                            <tr>
+                                <td>@record.AttendanceDate.ToString("dd.MM.yyyy")</td>
+                                <td>@record.DayOfWeek</td>
+                                <td>@record.AttendanceDate.ToString("HH:mm")</td>
+                                <td>Week @System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(record.AttendanceDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        <h5>No training sessions found</h5>
+        <p>You haven't attended any training sessions in the selected period (@Model.StartDate.ToString("dd.MM.yyyy") - @Model.EndDate.ToString("dd.MM.yyyy")).</p>
+        <p>Make sure to check in with QR code when you attend training!</p>
+    </div>
+}
+
+@if (Model.AttendanceRecords.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Training Statistics</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Most Frequent Training Days:</h6>
+                    <ul class="list-group">
+                        @{
+                            var dayStats = Model.AttendanceRecords
+                            .GroupBy(r => r.DayOfWeek)
+                            .OrderByDescending(g => g.Count())
+                            .Take(3);
+                        }
+                        @foreach (var day in dayStats)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @day.Key
+                                <span class="badge bg-primary rounded-pill">@day.Count()</span>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Training Distribution:</h6>
+                    <ul class="list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Morning (06:00-12:00)
+                            <span class="badge bg-info rounded-pill">
+                                @Model.AttendanceRecords.Count(r => r.AttendanceDate.Hour >= 6 && r.AttendanceDate.Hour < 12)
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Afternoon (12:00-18:00)
+                            <span class="badge bg-info rounded-pill">
+                                @Model.AttendanceRecords.Count(r => r.AttendanceDate.Hour >= 12 && r.AttendanceDate.Hour < 18)
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Evening (18:00-24:00)
+                            <span class="badge bg-info rounded-pill">
+                                @Model.AttendanceRecords.Count(r => r.AttendanceDate.Hour >= 18)
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="endYear"]').max = new Date().getFullYear();
+        document.querySelector('input[name="startYear"]').max = new Date().getFullYear();
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const startDay = parseInt(document.querySelector('input[name="startDay"]').value);
+            const startMonth = parseInt(document.querySelector('select[name="startMonth"]').value);
+            const startYear = parseInt(document.querySelector('input[name="startYear"]').value);
+
+            const endDay = parseInt(document.querySelector('input[name="endDay"]').value);
+            const endMonth = parseInt(document.querySelector('select[name="endMonth"]').value);
+            const endYear = parseInt(document.querySelector('input[name="endYear"]').value);
+
+            const startDate = new Date(startYear, startMonth - 1, startDay);
+            const endDate = new Date(endYear, endMonth - 1, endDay);
+
+            if (startDate > endDate) {
+                e.preventDefault();
+                alert('Start date cannot be after end date');
+            }
+        });
+
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function () {
+                const value = parseInt(this.value);
+                const min = parseInt(this.min);
+                const max = parseInt(this.max);
+
+                if (value < min) this.value = min;
+                if (value > max) this.value = max;
+            });
+        });
+    </script>
+}
+
+<style>
+    .table {
+        color: white !important;
+        background-color: #222 !important;
+    }
+
+        .table td,
+        .table th {
+            color: white !important;
+            border-color: #444 !important;
+        }
+
+        .table thead th {
+            background-color: #333 !important;
+            border-color: #444 !important;
+        }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #222 !important;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #2a2a2a !important;
+    }
+
+    .table tbody tr:hover {
+        background-color: #333 !important;
+    }
+
+    .list-group-item {
+        background-color: #222;
+        color: white;
+        border-color: #444;
+    }
+
+    .card {
+        background-color: #222;
+        border-color: #444;
+    }
+
+    .card-header {
+        background-color: #333;
+        border-color: #444;
+        color: white;
+    }
+</style>
