@@ -103,12 +103,7 @@ namespace trainingAttendanceTracker.Controllers
             public string NewRole { get; set; }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> RoleManagement()
-        {
-            var roles = await _roleManager.Roles.ToListAsync();
-            return View(roles);
-        }
+      
     }
 
     public class UserRoleViewModel
