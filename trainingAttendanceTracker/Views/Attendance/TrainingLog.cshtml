@@ -119,8 +119,10 @@
                 <h1 class="card-text display-4">
                     @if (Model.TotalTrainings > 0)
                     {
-                        var daysInPeriod = (Model.EndDate - Model.StartDate).TotalDays + 1;
-                        var frequency = daysInPeriod / Model.TotalTrainings;
+                        var firstTraining = Model.AttendanceRecords.Min(r => r.AttendanceDate);
+                        var lastTraining = Model.AttendanceRecords.Max(r => r.AttendanceDate);
+                        var actualDays = (lastTraining - firstTraining).TotalDays;
+                        var frequency = actualDays / (Model.TotalTrainings - 1);
                         @frequency.ToString("F1")
                     }
                     else
